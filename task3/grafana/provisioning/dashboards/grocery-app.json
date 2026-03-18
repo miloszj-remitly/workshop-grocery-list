@@ -1,0 +1,56 @@
+{
+  "title": "Grocery App Metrics",
+  "panels": [
+      {
+        "id": 1,
+        "title": "Database Query Duration",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "rate(db_query_duration_milliseconds_sum[5m]) / rate(db_query_duration_milliseconds_count[5m])",
+            "legendFormat": "Avg DB Query Time (ms)"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Cache Query Duration",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+        "targets": [
+          {
+            "expr": "rate(cache_query_duration_milliseconds_sum[5m]) / rate(cache_query_duration_milliseconds_count[5m])",
+            "legendFormat": "Avg Cache Query Time (ms)"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Cache Hit Rate",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+        "targets": [
+          {
+            "expr": "rate(cache_hits_total[5m]) / (rate(cache_hits_total[5m]) + rate(cache_misses_total[5m]))",
+            "legendFormat": "Cache Hit Rate"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "HTTP Requests",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+        "targets": [
+          {
+            "expr": "rate(http_requests_total[5m])",
+            "legendFormat": "{{method}} {{endpoint}} {{status}}"
+          }
+        ]
+      }
+    ],
+    "schemaVersion": 16,
+    "version": 0
+}
+

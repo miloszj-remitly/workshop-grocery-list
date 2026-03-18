@@ -1,2 +1,6 @@
 services:
-# TODO - Fill this in
+  grocery-app:
+    image: grocery-app:v1
+    build: .
+    ports:
+      - 8080:8080

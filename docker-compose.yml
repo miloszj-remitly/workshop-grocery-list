@@ -4,15 +4,23 @@ services:
     build: .
     ports:
       - 8080:8080
-
     depends_on:
-# TODO - Add dependencies    
+      - grocery-mysql
+      - cache
     environment:
-   # TODO - Add env vars 
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - CACHE_HOST=${CACHE_HOST}
+      - CACHE_PORT=${CACHE_PORT}
+    
   grocery-mysql:
     image: mysql:8.0
     environment:
-    # TODO - Add dependencies
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
     ports:
       - 3306:3306
     volumes:

@@ -1,0 +1,284 @@
+openapi: 3.0.3
+info:
+  title: Grocery List API
+  description: A simple API for managing grocery lists with MySQL storage and Prometheus metrics
+  version: 1.0.0
+  contact:
+    name: API Support
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+tags:
+  - name: health
+    description: Health check endpoints
+  - name: groceries
+    description: Grocery list management
+  - name: metrics
+    description: Prometheus metrics
+
+paths:
+  /health:
+    get:
+      tags:
+        - health
+      summary: Health check
+      description: Check if the service and database are healthy
+      operationId: getHealth
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: unhealthy
+                  error:
+                    type: string
+                    example: database connection failed
+
+  /groceries:
+    post:
+      tags:
+        - groceries
+      summary: Create a grocery list
+      description: Create a new grocery list for a user with multiple items
+      operationId: createGroceryList
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroceryListRequest'
+            examples:
+              example1:
+                summary: Simple grocery list
+                value:
+                  username: alice
+                  items:
+                    - milk
+                    - bread
+                    - eggs
+              example2:
+                summary: Larger grocery list
+                value:
+                  username: bob
+                  items:
+                    - chicken
+                    - rice
+                    - vegetables
+                    - soy sauce
+                    - garlic
+      responses:
+        '201':
+          description: Grocery list created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Grocery list created successfully
+                  username:
+                    type: string
+                    example: alice
+                  items_added:
+                    type: integer
+                    example: 4
+        '400':
+          description: Bad request - invalid input
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Username is required
+        '500':
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Failed to save items
+
+    get:
+      tags:
+        - groceries
+      summary: Get grocery lists
+      description: Retrieve all grocery items for a specific user
+      operationId: getGroceryLists
+      parameters:
+        - name: username
+          in: query
+          required: true
+          description: Username to retrieve grocery lists for
+          schema:
+            type: string
+          example: alice
+      responses:
+        '200':
+          description: Successfully retrieved grocery lists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroceryListResponse'
+              examples:
+                example1:
+                  summary: User with items
+                  value:
+                    username: alice
+                    count: 3
+                    items:
+                      - id: 3
+                        username: alice
+                        item_name: eggs
+                        quantity: 1
+                        created: "2026-03-16T10:30:00Z"
+                      - id: 2
+                        username: alice
+                        item_name: bread
+                        quantity: 1
+                        created: "2026-03-16T10:30:00Z"
+                      - id: 1
+                        username: alice
+                        item_name: milk
+                        quantity: 1
+                        created: "2026-03-16T10:30:00Z"
+                example2:
+                  summary: User with no items
+                  value:
+                    username: charlie
+                    count: 0
+                    items: []
+        '400':
+          description: Bad request - username parameter missing
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Username query parameter is required
+        '500':
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Failed to retrieve items
+
+  /metrics:
+    get:
+      tags:
+        - metrics
+      summary: Prometheus metrics
+      description: Get Prometheus metrics for monitoring
+      operationId: getMetrics
+      responses:
+        '200':
+          description: Prometheus metrics in text format
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: |
+                  # HELP http_requests_total Total number of HTTP requests
+                  # TYPE http_requests_total counter
+                  http_requests_total{method="GET",endpoint="/health",status="200"} 10
+                  # HELP grocery_items_total Total number of grocery items created
+                  # TYPE grocery_items_total counter
+                  grocery_items_total 42
+
+components:
+  schemas:
+    GroceryListRequest:
+      type: object
+      required:
+        - username
+        - items
+      properties:
+        username:
+          type: string
+          description: Username of the person creating the grocery list
+          example: alice
+          minLength: 1
+        items:
+          type: array
+          description: List of grocery items to add
+          items:
+            type: string
+          minItems: 1
+          example:
+            - milk
+            - bread
+            - eggs
+
+    GroceryItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the grocery item
+          example: 1
+        username:
+          type: string
+          description: Username who owns this item
+          example: alice
+        item_name:
+          type: string
+          description: Name of the grocery item
+          example: milk
+        quantity:
+          type: integer
+          description: Quantity of the item
+          example: 1
+          default: 1
+        created:
+          type: string
+          format: date-time
+          description: Timestamp when the item was created
+          example: "2026-03-16T10:30:00Z"
+
+    GroceryListResponse:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Username whose grocery lists are returned
+          example: alice
+        count:
+          type: integer
+          description: Total number of items
+          example: 3
+        items:
+          type: array
+          description: List of grocery items (sorted by created date, newest first)
+          items:
+            $ref: '#/components/schemas/GroceryItem'
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - healthy
+            - unhealthy
+          example: healthy
+        error:
+          type: string
+          description: Error message if unhealthy
+          example: database connection failed
+

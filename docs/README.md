@@ -4,110 +4,123 @@
 
 List Docker networks available by default:
 
-bash
+```bash
 docker network ls
+```
 
 Run two containers:
 
-bash
+```bash
 docker run -itd --rm --name box busybox
 docker run -itd --rm --name web nginx
 docker container ls
 docker network inspect bridge
+```
 
 ### Ping in the default bridge network
 
-Check the IP address of `web` container:
+Check the IP address of `nginx`:
 
-bash
+```bash
 docker network inspect bridge
+```
 
 Open shell in `box`:
 
-bash
+```bash
 docker exec -it box sh
+```
 
 Ping the `web` container by IP address:
 
-bash
-ping <web ip address>
+```bash
+ping 172.168.0.3
+```
 
-This works, but try now to ping the container by name:
+This works, but pinging by container name does not:
 
-bash
+```bash
 ping web
+```
 
 DNS does not work in the default bridge network.
 
-## Ping in new network-1
+## Ping in created network-1
 
 Create your own bridge network:
 
-bash
+```bash
 docker network create network-1
 docker network connect network-1 box
 docker network connect network-1 web
 docker network inspect network-1
 docker exec -it box sh
-ping <web ip address>
+ping 172.167.0.3
 ping web
+```
 
 DNS works in the created network.
 
 Stop containers:
 
-bash
+```bash
 docker container stop box web
 docker container ls
-docker container rm box web
+```
 
 The container list should now be empty.
 
 ## How do I open container app from my computer?
 
-Run `nginx` image and publish it on port 80:
+Run `nginx` and publish port 80:
 
-bash
+```bash
 docker run -itd --rm --network network-1 --name web -p 80:80 nginx
 docker container ls
+```
 
 Open in browser:
 
-text
+```text
 http://localhost:80
-You should see the nginx running on web
+```
 
 Stop container:
 
-bash
+```bash
 docker container stop web
 docker container ls
+```
 
 The container list should now be empty.
 
 You can remove the network now:
 
-bash
+```bash
 docker network rm network-1
+```
 
 ## Host networking: direct access, less isolation
 
 Run container with host networking:
 
-bash
+```bash
 docker run -itd --rm --network host --name web nginx
 docker container ls
+```
 
 Open in browser:
 
-text
+```text
 http://localhost:80
+```
 
 Stop container:
 
-bash
+```bash
 docker container stop web
 docker container ls
+```
 
 The container list should now be empty.
 
@@ -115,39 +128,44 @@ The container list should now be empty.
 
 List volumes:
 
-bash
+```bash
 docker volume ls
+```
 
 Create a volume:
 
-bash
+```bash
 docker volume create my-volume
 docker volume ls
 docker volume inspect my-volume
+```
 
 Go to volume mount point:
 
-text
-cd <mount point path>
-*nit: it is probably /var/lib/docker/volumes/my-volume/_data*
+```text
+/var/lib/docker/volumes/my-volume/_data
+```
 
 Add a file with some text:
 
-bash
+```bash
 echo "my text" > file.txt
+```
 
 Mount it into a container:
 
-bash
+```bash
 docker run -itd --rm -v my-volume:/data --name box busybox
 docker container inspect box
 docker exec -it box sh
+```
 
 Inside the container:
-Go to the mounted directory
-bash
+
+```bash
 cd data
 cat file.txt
+```
 
 You should see the text from the host.
 
@@ -157,16 +175,20 @@ Stop container.
 
 Check the mount point again:
 
-Read the file on the host:
+```text
+/var/lib/docker/volumes/my-volume/_data
+```
 
-bash
+Read the file:
+
+```bash
 cat file.txt
+```
 
 The data is still there, even though the container is gone.
 
 You can remove the volume now:
 
-bash
+```bash
 docker volume rm my-volume
-`
-Message Tomasz Bochnak
+```

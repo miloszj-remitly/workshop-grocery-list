@@ -32,3 +32,22 @@ services:
       - 6379:6379
     command: redis-server --save 60 1 --loglevel warning
 
+  grafana:
+    image: grafana/grafana
+    ports:
+      - 3000:3000
+    volumes:
+ # TODO - Modify this
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=${GF_AUTH_ANONYMOUS_ENABLED}
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=${GF_AUTH_ANONYMOUS_ORG_ROLE}
+
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - 9090:9090
+    volumes:
+# TODO - Modify this
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml

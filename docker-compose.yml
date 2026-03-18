@@ -38,7 +38,7 @@ services:
       - 3000:3000
     volumes:
  # TODO - Modify this
-      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./task3/grafana/provisioning:/etc/grafana/provisioning
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=${GF_AUTH_ANONYMOUS_ENABLED}
       - GF_AUTH_ANONYMOUS_ORG_ROLE=${GF_AUTH_ANONYMOUS_ORG_ROLE}
@@ -50,4 +50,4 @@ services:
       - 9090:9090
     volumes:
 # TODO - Modify this
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./task3/prometheus.yml:/etc/prometheus/prometheus.yml

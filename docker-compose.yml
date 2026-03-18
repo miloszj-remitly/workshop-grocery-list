@@ -4,3 +4,23 @@ services:
     build: .
     ports:
       - 8080:8080
+
+    depends_on:
+# TODO - Add dependencies    
+    environment:
+   # TODO - Add env vars 
+  grocery-mysql:
+    image: mysql:8.0
+    environment:
+    # TODO - Add dependencies
+    ports:
+      - 3306:3306
+    volumes:
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+  
+  cache:
+    image: redis:7-alpine
+    ports:
+      - 6379:6379
+    command: redis-server --save 60 1 --loglevel warning
+
